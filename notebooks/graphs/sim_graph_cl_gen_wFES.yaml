@@ -1,0 +1,140 @@
+graph_name: bci_control_sim
+nodes:
+- module: ../brand-modules/cursor-control
+  name: display_centerOut
+  nickname: display_centerOut
+  parameters:
+    fullscreen: true
+    log: INFO
+    sync_key: sync
+    syncbox: false
+    time_key: ts
+    window_height: 1080
+    window_width: 1920
+  run_priority: 99
+- module: ../brand-modules/brand-rehab
+  name: fesUECU
+  nickname: fes_UECU
+  parameters:
+    input_dtype: float32
+    input_stream: wiener_filter
+    log: INFO
+  run_priority: 99
+- module: ../brand-modules/cursor-control
+  name: radialFSM
+  nickname: radial_fsm
+  parameters:
+    cursor_radius: 25
+    delay_time_in:
+      max: 0
+      min: 0
+    delay_time_out:
+      max: 0
+      min: 0
+    distance_from_center: 400
+    initial_wait_time: 5
+    input_dtype: float32
+    input_stream: wiener_filter
+    inter_trial_time_failure:
+      max: 1.0
+      min: 1.0
+    inter_trial_time_in:
+      max: 0
+      min: 0
+    inter_trial_time_out:
+      max: 0
+      min: 0
+    log: INFO
+    recenter: false
+    recenter_on_fail: true
+    sync_key: sync
+    target_angles:
+    - 0
+    - 45
+    - 90
+    - 135
+    - 180
+    - 225
+    - 270
+    - 315
+    target_diameter: 80
+    target_hold_time_in:
+      max: 1.0
+      min: 1.0
+    target_hold_time_out:
+      max: 1.0
+      min: 1.0
+    time_key: ts
+  run_priority: 99
+- module: ../brand-modules/cursor-control
+  name: wiener_filter
+  nickname: wiener_filter
+  parameters:
+    decoder_type: linear
+    input_dtype: int8
+    input_field: samples
+    input_stream: binned_spikes
+    log: INFO
+    model_path: /home/ben/Projects/brand-tutorial/notebooks/data/230927T1624_wf_seq_len_15.pkl
+    n_features: 192
+    n_targets: 2
+    output_dtype: float32
+    output_field: samples
+    output_stream: wiener_filter
+    seq_len: 15
+  run_priority: 99
+- module: ../brand-modules/cursor-control
+  name: bin_multiple
+  nickname: bin_multiple
+  parameters:
+    bin_size: 10
+    chan_per_stream: 192
+    input_dtype: int8
+    input_field: thresholds
+    input_streams:
+    - threshold_values
+    log: INFO
+    output_stream: binned_spikes
+    sync_field: null
+    total_channels: 192
+  run_priority: 99
+- module: ../brand-modules/brand-simulator
+  name: thresholds_udp
+  nickname: thresholds_udp
+  parameters:
+    fr_sample_rate: 200
+    input_stream: firing_rates
+    log: INFO
+    max_samples: 300000
+    n_neurons: 192
+    output_stream: threshold_values
+    random_seed: 42
+    sample_rate: 1000
+    udp_interface: null
+    udp_ip: 127.0.0.1
+    udp_port: 50114
+  run_priority: 99
+- module: ../brand-modules/brand-simulator
+  name: sim2D
+  nickname: sim2D
+  parameters:
+    in_stream: mouse_vel
+    log: INFO
+    max_samples: 6000
+    max_v: 25.0
+    n_neurons: 192
+  run_priority: 99
+- module: ../brand-modules/brand-simulator
+  name: mouseAdapter
+  nickname: mouseAdapterSim
+  parameters:
+    log: INFO
+    max_samples: 600000
+    mouse_device: /dev/input/by-id/usb-Razer_Razer_Viper-event-mouse
+    sample_rate: 200
+    samples_per_redis_stream: 1
+  run_priority: 99
+parameters:
+  total_channels: 192
+participant_id: sim
+session_description: null
